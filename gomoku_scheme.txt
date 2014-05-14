@@ -19,4 +19,33 @@ man-machine functionality is planned nor implemented (yet).
 ----------------------------------------
 Changelog:
 
-0.1	Initial Release
+Version:		0.1 Initial Release
+Stable:			No
+Date:			May 13th, 2014
+
+Info:
+
+The most basic game mechanic is now implemented and should be working
+properly as long as the player don't make any exception that the
+program cannot handle.
+
+Functionality Illustration:
+
+----------------------------------------
+Annotation Notice:
+*	   General Demonstration
++/-	   New/Cut Features
+%	   LTS(Long Term Support) that requires further maintenance
+!	   Known Bug
+----------------------------------------
+
+###### 0.1 Initial Release ######
+
+*      Program so far is poorly(imo) implemented and can ONLY
+       Function properly under CERTAIN condions.
+
+!      No Chessboard Displayed(Will be added in the following version)
+
+!      Collision Detection in need
+
+%      So far the program cannot handle any exceptions
