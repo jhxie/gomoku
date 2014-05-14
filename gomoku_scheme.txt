@@ -1,0 +1,22 @@
+----------------------------------------
+Project Name      : Gomoku Simulation
+Project Start Time: May 12th, 2014
+Project Type      : Simulation/Game
+Language Used     : Python 3.4.0
+License           : GNU GPL 3
+Interface         : Text-based/No GUI
+Author(s)         : Jiahui Xie
+Version           : 0.1
+Final             : No
+----------------------------------------
+Illustration of the Project:
+
+A simple gomoku simulation program purily implemented with Python.
+The game is designed to be played between 2 players and so far no
+man-machine functionality is planned nor implemented (yet).
+2 Players are denoted by O and X, respectively. 
+
+----------------------------------------
+Changelog:
+
+0.1	Initial Release
