@@ -7,7 +7,7 @@ Language Used     : Python 3.4.0
 License           : GNU GPL 3
 Interface         : Text-based/No GUI
 Author(s)         : Jiahui Xie
-Version           : 0.1
+Version           : 0.2
 Final             : No
 ----------------------------------------
 """
@@ -18,7 +18,7 @@ def main() -> None:
     start_choice = int(input("Press 1 and enter to start the game, 2 to exit > "))
 
     if start_choice == 1:
-        gomoku_main(chessboard_size = 5)
+        gomoku_main(chessboard_size = 9)
         
     elif start_choice == 2:
         print("Program exited!")
@@ -39,6 +39,7 @@ def gomoku_main(*, chessboard_size: int = 0) -> None:
             print("Player A is denoted by O, Player B is denoted by X")
             print("-" * 40)
             info_hint -= 1
+            draw_ascii_chessboard(chessboard)
             
         if player_cycle == 0:   # Please note that this conditional clause ASSUME the player make no mistakes
             print("-" * 40)
@@ -48,6 +49,7 @@ def gomoku_main(*, chessboard_size: int = 0) -> None:
             coordinate = (row_number, col_number)
             chessboard = update_chessboard(board_input = chessboard, position = coordinate, player = player_cycle)
             player_cycle += 1
+            draw_ascii_chessboard(chessboard)
             continue
 
         elif player_cycle == 1: # ASSUME no mistakes made by players
@@ -58,6 +60,7 @@ def gomoku_main(*, chessboard_size: int = 0) -> None:
             coordinate = (row_number, col_number)
             chessboard = update_chessboard(board_input = chessboard, position = coordinate, player = player_cycle)
             player_cycle -= 1
+            draw_ascii_chessboard(chessboard)
             continue
 
     print("-" * 40)
@@ -70,57 +73,107 @@ def update_chessboard(*, board_input: list = [], position: tuple = (), player: i
     #update = lambda inp, pos, plyr: inp[pos[0]][pos[1]] = plyr
 
     #update(board_input, position, 'O') if player == 0 else update(board_input, position, 'X')
+    if board_input[position[0]][position[1]] == None:
+        board_input[position[0]][position[1]] = 'O' if player == 0 else 'X'
+        return board_input
 
-    board_input[position[0]][position[1]] = 'O' if player == 0 else 'X'
-    return board_input
+    elif board_input[position[0]][position[1]] in 'OX':
 
-def winning_check(board: list = []) -> (bool, str):
+        if player == 0:
+            print("You cannot place anoter piece onto the previous one!")
+        elif player == 1:
+            print("You cannot place your piece onto the other player's!")
+            
+def winning_check(board_input: list = []) -> (bool, str):
 
     # Handles row
-    for row in board:           
-        if len(set(row)) == 1:
+    for row in board_input:   
 
-            if row[0] == 'O':
-                return 'A'
+        if determine_winner(mode = "count", line_input = row):
 
-            elif row[0] == 'X':
-                return 'B'
-
+            return determine_winner(mode = "count", line_input = row)
+            
     # Handles column
-    col_entry = [[row[i] for row in board] for i in range(len(board))]
+    col_entry = [[row[i] for row in board_input] for i in range(len(board_input))]
     
     for col in col_entry:
 
-        if len(set(col)) == 1:
+        if determine_winner(mode = "count", line_input = col):
 
-            if col[0] == 'O':
-                return 'A'
-
-            elif col[0] == 'X':
-                return 'B'
-
+            return determine_winner(mode = "count", line_input = col)
+            
     # Handles diagonal
-    diagonal_entry = [board[i][i] for i in range(len(board))]
-
-    if len(set(diagonal_entry)) == 1: 
+    for row_ind in range(len(board_input)):
         
-        if row[0] == 'O':
-            return 'A'
+        for col_ind in range(len(board_input)):
+            
+            # Case I: Upper diagonal antenna
+            if row_ind > 3:
 
-        elif row[0] == 'X':
-            return 'B'
+                # Upper Left
+                if col_ind > 3:
+                    obsr_list = []
+                    for link_ind in range(5):
+                        
+                        obsr_list.append(board_input[row_ind - link_ind][col_ind - link_ind])
 
-    # Handles anti-diagonal
+                    if determine_winner(line_input = obsr_list):
+                        
+                        return determine_winner(line_input = obsr_list)
+                            
+                # Upper right
+                if (len(board_input) - 1 - col_ind) > 3:
+                    obsr_list = []
+                    for link_ind in range(5):
+                        
+                        obsr_list.append(board_input[row_ind - link_ind][col_ind + link_ind])
+                        
+                    if determine_winner(line_input = obsr_list):
 
+                        return determine_winner(line_input = obsr_list)
+                            
+            # Case II: Lower diagonal antenna
+            if (len(board_input) - 1 - row_ind) > 3:
+                
+                # Lower Left
+                if col_ind > 3:
+                    obsr_list = []
+                    for link_ind in range(5):
+                        
+                        obsr_list.append(board_input[row_ind + link_ind][col_ind - link_ind])
+                        
+                    if determine_winner(line_input = obsr_list):
+
+                        return determine_winner(line_input = obsr_list)
+                            
+                # Lower Right
+                if (len(board_input) - 1 - col_ind) > 3:
+                    obsr_list = []
+                    for link_ind in range(5):
+                        
+                        obsr_list.append(board_input[row_ind + link_ind][col_ind + link_ind])
+
+                    if determine_winner(line_input = obsr_list):
+
+                        return determine_winner(line_input = obsr_list)
+                            
     # ----------------------------------------
     # The following lines are obsolete
     # ----------------------------------------
-
-    #anti_diag_count = len(board) - 1
-    #anti_diag_entry = []
-    #for row in board:
-    #    anti_diag_entry.append(row[anti_diag_count])
-    #    anti_diag_count -= 1
+    # Handles diagonal
+    #diagonal_entry = [board[i][i] for i in range(len(board))]
+    #
+    #if len(set(diagonal_entry)) == 1: 
+    #    
+    #    if row[0] == 'O':
+    #        return 'A'
+    #
+    #    elif row[0] == 'X':
+    #        return 'B'
+    #
+    # Handles anti-diagonal
+    #
+    #anti_diag_entry = [board[i][len(board) - 1 - i] for i in range(len(board))]
     #
     #if len(set(anti_diag_entry)) == 1:
     #
@@ -130,17 +183,66 @@ def winning_check(board: list = []) -> (bool, str):
     #    elif anti_diag_entry[0] == 'X':
     #        return 'B'
     # ----------------------------------------
-
-    anti_diag_entry = [board[i][len(board) - 1 - i] for i in range(len(board))]
     
-    if len(set(anti_diag_entry)) == 1:
+def determine_winner(mode = "oblique", *, line_input: list = []) -> (bool, str):
+    """
+    This function is only meant to be used given the "line_input"
+    passed is an actual list.
+    """
+    if mode == "oblique":
+        if (line_input) and (len(set(line_input)) == 1):
 
-        if anti_diag_entry[0] == 'O':
-            return 'A'
+            if line_input[0] == 'O':
+                return 'A'
 
-        elif anti_diag_entry[0] == 'X':
-            return 'B'
+            elif line_input[0] == 'X':
+                return 'B'
             
-    return False
-    
+        return False
+            
+    elif mode == "count":
+        if line_input:
+            player1_count = player2_count = pointer = 0; following_entry = line_input[1]
+            
+            while (pointer < len(line_input)) and (player1_count < 5) and (player2_count < 5):
+
+                if line_input[pointer] == 'O':
+
+                    if following_entry == 'O':
+                        player1_count += 1 if (player1_count != 0) else 2
+                        print(player1_count)
+                    else:
+                        player1_count = 0
+
+                elif line_input[pointer] == 'X':
+
+                    if following_entry == 'X':
+                        player2_count += 1 if (player2_count != 0) else 2
+
+                    else:
+                        player2_count = 0
+
+                pointer += 1
+                following_entry = line_input[pointer + 1] if (pointer + 1) < len(line_input) else None
+                
+            if player1_count > 4:
+                return 'A'
+                
+            elif player2_count > 4:
+                return 'B'
+                
+            return False
+                    
+def draw_ascii_chessboard(board_input: list = []) -> None:
+    "Void Function"
+    print("_" * (len(board_input) * 2 + 1))
+
+    for row in board_input:
+
+        for entry in row:
+            print("|", end = '')
+            print(" ", end = '') if entry == None else print(entry, end = '')
+
+        print("|")
+        print("-" * (len(board_input) * 2 + 1))
 main()
