@@ -1,0 +1,71 @@
+Changelog:
+========================================
+Latest Version:		0.3
+Stable:			Acceptable
+Latest Release Date:	May 16th, 2014
+========================================
+Functionality Illustration:
+
+----------------------------------------
+Annotation Notice:
+*	   General Demonstration
++/-	   New/Cut Features
+%	   LTS(Long Term Support) that requires further maintenance
+!	   Known Bug
+----------------------------------------
+
+Latest Version Info:
+
+The program is further revised and should function properly with an
+ASCII-based chessboard display.
+
+###### 0.3 Debugging/Exception Handling ######
+
+*      Program so far can be considered is in a moderate stable status
+       unless you intentially break it, lots of input exception
+       handling functionality added.
+
+-      "update_chessboard" function's old collision detecting is obsolete
+       due to an extremely obvious logical fallacy.
+       
++      Input exceptoin handling added throughout "main", "gomoku_main",
+       "update_chessboard"
+       
+!      There are lots of redundant exception handling code, especially
+       in both "gomoku_main" and "update_chessboard".
+
+%      Probably add an auto save game functionality if the program is
+       forced to exit in the next version.
+
+%      Redundant exception handling code in "gomoku_main" and
+        "update_chessboard" MAY be addressed in the later versions.
+	
+###### 0.2 Add ASCII Chessboard ######
+
+*      Program now is considered partially finished in terms of its
+       most fundamental functionality. However, it lacks robustness,
+       a LTS feature which will be further addressed by later releases.
+
++      ASCII-text based chessboard display
+
+-      Original diagonal check within "winning_check" function is
+       removed and completely re-written(original code left for
+       reference) to deal with general conditions rather than 
+       work as a Tic-Tac-Toe-like calculation.
+       
+!      Collision Detection is ONLY partially implemendted; the
+       program should be able to detect them but so far cannot
+       resolve them.
+
+%      Exception handling need to be further enhanced.
+
+###### 0.1 Initial Release ######
+
+*      Program so far is poorly(imo) implemented and can ONLY
+       Function properly under CERTAIN condions.
+
+!      No Chessboard Displayed(Will be added in the following version)
+
+!      Collision Detection in need
+
+%      So far the program cannot handle any exceptions

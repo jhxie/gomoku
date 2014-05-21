@@ -7,30 +7,48 @@ Language Used     : Python 3.4.0
 License           : GNU GPL 3
 Interface         : Text-based/No GUI
 Author(s)         : Jiahui Xie
-Version           : 0.2
+Version           : 0.3
 Final             : No
 ----------------------------------------
 """
 def main() -> None:
+    """
+    Top Level Starter
+    Handles the start or the exit of the program.
+    """
     print("-" * 40)
     print("Welcome to the Gomoku Simulation")
     print("-" * 40)
-    start_choice = int(input("Press 1 and enter to start the game, 2 to exit > "))
+    start_choice = input("Press 1 and enter to start the game, 2 to exit > ")
 
-    if start_choice == 1:
-        gomoku_main(chessboard_size = 9)
+    # Error Checking Block
+    while True:
+        if ((start_choice.isdigit()) and (start_choice in '12') and (len(start_choice) == 1)): 
+            break
+        start_choice = input("Invalid Input! You must enter either 1 or 2 > ")
         
-    elif start_choice == 2:
+    if start_choice in '1':
+        gomoku_main(chessboard_size = 30)
+        
+    elif start_choice in '2':
         print("Program exited!")
 
 def gomoku_main(*, chessboard_size: int = 0) -> None:
     """
-    2 players are denoted by O and X, respectively.
+    Main Game Loop
+    This function is in charge of the switch loop between the two
+    and report the winning player when one player wins.
+    Two players are denoted by O and X, respectively.
+    ----------------------------------------
+    Version Change Notice
+    ----------------------------------------
+    0.3    variable row_number & col_number is no longer 0 based index
+    ----------------------------------------
     """
     chessboard = [[None] * chessboard_size for i in range(chessboard_size)]
     player_cycle = 0; info_hint = 1
     
-    while not winning_check(chessboard):
+    while True:
 
         if info_hint:
             print("-" * 40)
@@ -41,48 +59,135 @@ def gomoku_main(*, chessboard_size: int = 0) -> None:
             info_hint -= 1
             draw_ascii_chessboard(chessboard)
             
-        if player_cycle == 0:   # Please note that this conditional clause ASSUME the player make no mistakes
+        # First player A's turn: O
+        if player_cycle == 0:
             print("-" * 40)
             print("Player A's turn!")
-            row_number = int(input("Please enter the row number > "))
-            col_number = int(input("Please enter the column number > "))
-            coordinate = (row_number, col_number)
+            
+            # Please be aware that row/col number from 0.3 have become 1-len(chessboard) based,
+            # no longer 0 based index as 0.2 and before
+            row_number = input("Please enter the row number > ")
+            col_number = input("Please enter the column number > ")
+            
+            while True:
+                if (row_number.isdigit() and (0 < int(row_number) <= len(chessboard))
+                    and col_number.isdigit() and (0 < int(col_number) <= len(chessboard))):
+                    break
+                print("You entered invalid row/column number, please try again!")
+                row_number = input("Please enter the row number > ")
+                col_number = input("Please enter the column number > ")
+
+            coordinate = (int(row_number) - 1, int(col_number) - 1)
             chessboard = update_chessboard(board_input = chessboard, position = coordinate, player = player_cycle)
             player_cycle += 1
             draw_ascii_chessboard(chessboard)
+            current_board_status = winning_check(chessboard)
+
+            if current_board_status:
+                break
             continue
 
-        elif player_cycle == 1: # ASSUME no mistakes made by players
+        # Second player B's turn: X
+        elif player_cycle == 1:
             print("-" * 40)
             print("Player B's turn!")
-            row_number = int(input("Please enter the row number > "))
-            col_number = int(input("Please enter the column number > "))
-            coordinate = (row_number, col_number)
+            
+            # Please be aware that row/col number from 0.3 have become 1-len(chessboard) based,
+            # no longer 0 based index as 0.2 and before
+            row_number = input("Please enter the row number > ")
+            col_number = input("Please enter the column number > ")
+            
+            while True:
+                if (row_number.isdigit() and (0 < int(row_number) <= len(chessboard))
+                    and col_number.isdigit() and (0 < int(col_number) <= len(chessboard))):
+                    break
+                print("You entered invalid row/column number, please try again!")
+                row_number = input("Please enter the row number > ")
+                col_number = input("Please enter the column number > ")
+
+            coordinate = (int(row_number) - 1, int(col_number) - 1)
+
             chessboard = update_chessboard(board_input = chessboard, position = coordinate, player = player_cycle)
             player_cycle -= 1
             draw_ascii_chessboard(chessboard)
+            current_board_status = winning_check(chessboard)
+            
+            if current_board_status:
+                break
             continue
 
     print("-" * 40)
-    print("Player %s Win!\nGame ends here!" %winning_check(chessboard))
-    print(chessboard)
+    print("Player %s Win!\nGame ends here!" % current_board_status)
+    # print(chessboard)
     print("-" * 40)
 
 def update_chessboard(*, board_input: list = [], position: tuple = (), player: int = 0) -> list:
+    """
+    Place the corresponding 'O' or 'X' inside the board_input
+    ----------------------------------------
+    Version Change Notice
+    ----------------------------------------
+    0.3    exception handling added:
+           can detect collision and force
+           the player to re-place their piece
+    ----------------------------------------
+    """
 
-    #update = lambda inp, pos, plyr: inp[pos[0]][pos[1]] = plyr
-
-    #update(board_input, position, 'O') if player == 0 else update(board_input, position, 'X')
+    
     if board_input[position[0]][position[1]] == None:
         board_input[position[0]][position[1]] = 'O' if player == 0 else 'X'
         return board_input
 
     elif board_input[position[0]][position[1]] in 'OX':
 
-        if player == 0:
-            print("You cannot place anoter piece onto the previous one!")
-        elif player == 1:
-            print("You cannot place your piece onto the other player's!")
+
+        if board_input[position[0]][position[1]] == 'O':
+            if player == 0:
+                print("You cannot place another piece onto the previous one!\nPlease re-position it!")
+            elif player == 1:
+                print("You cannot place your piece onto the other player's!\nPlease re-position it!")            
+
+        if board_input[position[0]][position[1]] == 'X':
+            if player == 1:
+                print("You cannot place another piece onto the previous one!\nPlease re-position it!")
+            elif player == 0:
+                print("You cannot place your piece onto the other player's!\nPlease re-position it!")            
+
+        # Re-position the wrongly placed piece
+        row_number = input("Please enter the row number > ")
+        col_number = input("Please enter the column number > ")
+
+        while True:
+            if (row_number.isdigit() and (0 < int(row_number) <= len(board_input))
+                and col_number.isdigit() and (0 < int(col_number) <= len(board_input))
+                and board_input[int(row_number) - 1][int(col_number) - 1] == None): # index - 1 to support 1-based indexing
+                break
+
+            if (row_number.isdigit() and col_number.isdigit()):
+                if board_input[int(row_number) - 1][int(col_number) - 1] == 'O':
+                    if player == 0:
+                        print("You cannot place another piece onto the previous one!\nPlease re-position it!")
+                    elif player == 1:
+                        print("You cannot place your piece onto the other player's!\nPlease re-position it!")            
+
+                if board_input[int(row_number) - 1][int(col_number) - 1] == 'X':
+                    if player == 1:
+                        print("You cannot place another piece onto the previous one!\nPlease re-position it!")
+                    elif player == 0:
+                        print("You cannot place your piece onto the other player's!\nPlease re-position it!")            
+
+            print("You entered invalid row/column number, please try again!")
+            row_number = input("Please enter the row number > ")
+            col_number = input("Please enter the column number > ")
+
+        board_input[int(row_number) - 1][int(col_number) - 1] = 'O' if player == 0 else 'X'
+        return board_input
+    # ----------------------------------------
+    # The following lines are obsolete
+    # ----------------------------------------
+    #update = lambda inp, pos, plyr: inp[pos[0]][pos[1]] = plyr
+    #update(board_input, position, 'O') if player == 0 else update(board_input, position, 'X')
+    # ----------------------------------------
             
 def winning_check(board_input: list = []) -> (bool, str):
 
@@ -210,7 +315,7 @@ def determine_winner(mode = "oblique", *, line_input: list = []) -> (bool, str):
 
                     if following_entry == 'O':
                         player1_count += 1 if (player1_count != 0) else 2
-                        print(player1_count)
+                        # print(player1_count)
                     else:
                         player1_count = 0
 
@@ -218,7 +323,7 @@ def determine_winner(mode = "oblique", *, line_input: list = []) -> (bool, str):
 
                     if following_entry == 'X':
                         player2_count += 1 if (player2_count != 0) else 2
-
+                        # print(player2_count)
                     else:
                         player2_count = 0
 
