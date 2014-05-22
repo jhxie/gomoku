@@ -7,7 +7,7 @@ Language Used     : Python 3.4.0
 License           : GNU GPL 3
 Interface         : Text-based/No GUI
 Author(s)         : Jiahui Xie
-Version           : 0.3
+Version           : 0.4
 Final             : No
 ----------------------------------------
 """
@@ -15,7 +15,14 @@ def main() -> None:
     """
     Top Level Starter
     Handles the start or the exit of the program.
+    ----------------------------------------
+    Version Change Notice
+    ----------------------------------------
+    0.4    Conditional clause added to read auto-save file.
+    ----------------------------------------
     """
+    import os, pickle
+    
     print("-" * 40)
     print("Welcome to the Gomoku Simulation")
     print("-" * 40)
@@ -28,12 +35,38 @@ def main() -> None:
         start_choice = input("Invalid Input! You must enter either 1 or 2 > ")
         
     if start_choice in '1':
-        gomoku_main(chessboard_size = 30)
+
+        # Chessboard-loader
+        if os.getcwd()[-3:] == "sav":
+            pass
+        else:
+            os.chdir("sav")
+            
+        try:
+            with open("gomoku_autosave", "rb") as saved_status_data:
+                chessboard_saved_input, player_info = pickle.load(saved_status_data)
+            saved_status_data.close()
+            
+            # Null Save Checker
+            null_save = True
+            for line in chessboard_saved_input:
+                if len(set(line)) != 1:
+                    null_save = False
+                    break
+            
+            if (null_save):
+                gomoku_pvp_main(chessboard_size = 30) 
+            else:
+                gomoku_pvp_main(player_stat = player_info, saved_chessboard = chessboard_saved_input)
+        except IOError:
+            gomoku_pvp_main(chessboard_size = 30)
+            
+        # print(chessboard_saved_input)
         
     elif start_choice in '2':
         print("Program exited!")
 
-def gomoku_main(*, chessboard_size: int = 0) -> None:
+def gomoku_pvp_main(player_stat: int = None, saved_chessboard: list = [], *, chessboard_size: int = 0) -> None:
     """
     Main Game Loop
     This function is in charge of the switch loop between the two
@@ -42,12 +75,20 @@ def gomoku_main(*, chessboard_size: int = 0) -> None:
     ----------------------------------------
     Version Change Notice
     ----------------------------------------
+    0.4    try/except block added to achieve auto-save functionality
     0.3    variable row_number & col_number is no longer 0 based index
     ----------------------------------------
     """
-    chessboard = [[None] * chessboard_size for i in range(chessboard_size)]
-    player_cycle = 0; info_hint = 1
+    if (not saved_chessboard) and (not player_stat) and (chessboard_size):
+        chessboard = [[None] * chessboard_size for i in range(chessboard_size)]
+        player_cycle = 0; info_hint = 1
     
+    elif (not chessboard_size) and (saved_chessboard):
+        chessboard = saved_chessboard
+        player_cycle = player_stat; info_hint = 2
+    print("info_hint" in locals())
+    print("player_cycle" in locals())
+    print("chessboard" in locals())
     while True:
 
         if info_hint:
@@ -55,72 +96,96 @@ def gomoku_main(*, chessboard_size: int = 0) -> None:
             print("Please be aware that both players have to enter the row and\n + \
                   column numbers that they would like to place their pieces!")
             print("Player A is denoted by O, Player B is denoted by X")
+            
+            if info_hint == 2:
+                print("Recent Saved Game detected, continue from the saved game!")
+                info_hint -= 1
+                
             print("-" * 40)
             info_hint -= 1
             draw_ascii_chessboard(chessboard)
             
-        # First player A's turn: O
-        if player_cycle == 0:
-            print("-" * 40)
-            print("Player A's turn!")
-            
-            # Please be aware that row/col number from 0.3 have become 1-len(chessboard) based,
-            # no longer 0 based index as 0.2 and before
-            row_number = input("Please enter the row number > ")
-            col_number = input("Please enter the column number > ")
-            
-            while True:
-                if (row_number.isdigit() and (0 < int(row_number) <= len(chessboard))
-                    and col_number.isdigit() and (0 < int(col_number) <= len(chessboard))):
-                    break
-                print("You entered invalid row/column number, please try again!")
+        try:
+            # First player A's turn: O
+            if player_cycle == 0:
+                print("-" * 40)
+                print("Player A's turn!")
+
+                # Please be aware that row/col number from 0.3 have become 1-len(chessboard) based,
+                # no longer 0 based index as 0.2 and before
                 row_number = input("Please enter the row number > ")
                 col_number = input("Please enter the column number > ")
 
-            coordinate = (int(row_number) - 1, int(col_number) - 1)
-            chessboard = update_chessboard(board_input = chessboard, position = coordinate, player = player_cycle)
-            player_cycle += 1
-            draw_ascii_chessboard(chessboard)
-            current_board_status = winning_check(chessboard)
+                while True:
+                    if (row_number.isdigit() and (0 < int(row_number) <= len(chessboard))
+                        and col_number.isdigit() and (0 < int(col_number) <= len(chessboard))):
+                        break
+                    print("You entered invalid row/column number, please try again!")
+                    row_number = input("Please enter the row number > ")
+                    col_number = input("Please enter the column number > ")
 
-            if current_board_status:
-                break
-            continue
+                coordinate = (int(row_number) - 1, int(col_number) - 1)
+                chessboard = update_chessboard(board_input = chessboard, position = coordinate, player = player_cycle)
+                player_cycle += 1
+                draw_ascii_chessboard(chessboard)
+                current_board_status = winning_check(chessboard)
 
-        # Second player B's turn: X
-        elif player_cycle == 1:
-            print("-" * 40)
-            print("Player B's turn!")
-            
-            # Please be aware that row/col number from 0.3 have become 1-len(chessboard) based,
-            # no longer 0 based index as 0.2 and before
-            row_number = input("Please enter the row number > ")
-            col_number = input("Please enter the column number > ")
-            
-            while True:
-                if (row_number.isdigit() and (0 < int(row_number) <= len(chessboard))
-                    and col_number.isdigit() and (0 < int(col_number) <= len(chessboard))):
+                if current_board_status:
                     break
-                print("You entered invalid row/column number, please try again!")
+                continue
+
+            # Second player B's turn: X
+            elif player_cycle == 1:
+                print("-" * 40)
+                print("Player B's turn!")
+
+                # Please be aware that row/col number from 0.3 have become 1-len(chessboard) based,
+                # no longer 0 based index as 0.2 and before
                 row_number = input("Please enter the row number > ")
                 col_number = input("Please enter the column number > ")
 
-            coordinate = (int(row_number) - 1, int(col_number) - 1)
+                while True:
+                    if (row_number.isdigit() and (0 < int(row_number) <= len(chessboard))
+                        and col_number.isdigit() and (0 < int(col_number) <= len(chessboard))):
+                        break
+                    print("You entered invalid row/column number, please try again!")
+                    row_number = input("Please enter the row number > ")
+                    col_number = input("Please enter the column number > ")
 
-            chessboard = update_chessboard(board_input = chessboard, position = coordinate, player = player_cycle)
-            player_cycle -= 1
-            draw_ascii_chessboard(chessboard)
-            current_board_status = winning_check(chessboard)
+                coordinate = (int(row_number) - 1, int(col_number) - 1)
+
+                chessboard = update_chessboard(board_input = chessboard, position = coordinate, player = player_cycle)
+                player_cycle -= 1
+                draw_ascii_chessboard(chessboard)
+                current_board_status = winning_check(chessboard)
+
+                if current_board_status:
+                    break
+                continue
+    
+        # 0.4 New Feature
+        # Auto save the current chessboard status and the player's turn when forced to exit
+        except (SystemExit, KeyboardInterrupt, EOFError):
+            import os, pickle
+            if os.getcwd()[-3:] == "sav":
+                pass
+            else:
+                os.chdir("sav")
+            with open("gomoku_autosave", 'wb') as gomoku_status_save:
+                pickle.dump((chessboard, player_cycle), gomoku_status_save)
             
-            if current_board_status:
-                break
-            continue
+            os.chdir("..")
+            gomoku_status_save.close()
+            break
 
     print("-" * 40)
-    print("Player %s Win!\nGame ends here!" % current_board_status)
-    # print(chessboard)
-    print("-" * 40)
-
+    if ("current_board_status" in locals()) and (current_board_status):
+        print("Player %s Win!\nGame ends here!" % current_board_status)
+        # print(chessboard)
+        print("-" * 40)
+    else:
+        print("Game auto saved!")
+    
 def update_chessboard(*, board_input: list = [], position: tuple = (), player: int = 0) -> list:
     """
     Place the corresponding 'O' or 'X' inside the board_input
