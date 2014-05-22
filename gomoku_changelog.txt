@@ -1,8 +1,8 @@
 Changelog:
 ========================================
-Latest Version:		0.3
+Latest Version:		0.4
 Stable:			Acceptable
-Latest Release Date:	May 16th, 2014
+Latest Release Date:	May 22nd, 2014
 ========================================
 Functionality Illustration:
 
@@ -18,6 +18,18 @@ Latest Version Info:
 
 The program is further revised and should function properly with an
 ASCII-based chessboard display.
+
+###### 0.4 Auto-save Functionality ######
+
+*      Program is able to auto-save the current status of the game
+       if the player exit the program by Keyboard Interruption
+       (Alt + D); at the next launch it would detect and load the
+       non-null saved file and continue.
+       
++      Try/Except block added in "main" and "gomoku_pvp_main" to
+       achieve new feature afore-mentioned.
+       
+%      Code requires further debugging and testing as for new feature.
 
 ###### 0.3 Debugging/Exception Handling ######
 
